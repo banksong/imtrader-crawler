@@ -1,0 +1,2 @@
+- install python3
+- install itchat,apscheduler ( pip install itchat ) and related dependency
