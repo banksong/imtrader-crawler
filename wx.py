@@ -35,7 +35,7 @@ class wechatUser:
 
 
 def setLog():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     log_file_handler = TimedRotatingFileHandler(
         filename="crawler", when="D", interval=1, backupCount=3)
     log_file_handler.suffix = "%Y-%m-%d.log"
@@ -54,7 +54,7 @@ def wall_street_latest():
     starttime = datetime.datetime(1970, 1, 1, 8, 0, 0)
     # 读取新闻内容接口
     response = urllib.request.urlopen(
-        'https://api.wallstreetcn.com/v2/livenews?limit=0')
+        'http://api.wallstreetcn.com/v2/livenews?limit=0')
     http = response.read()
     hjson = json.loads(http.decode())
     liveNew = hjson['results'][0]
@@ -70,7 +70,7 @@ def wallstreet():
     starttime = datetime.datetime(1970, 1, 1, 8, 0, 0)
     # 读取新闻内容接口
     response = urllib.request.urlopen(
-        'https://api.wallstreetcn.com/v2/livenews?limit=0')
+        'http://api.wallstreetcn.com/v2/livenews?limit=0')
     http = response.read()
     hjson = json.loads(http.decode())
     liveNew = hjson['results'][0]
@@ -92,7 +92,7 @@ def crawler():
     global user_list
     if notify_content != '':
     	for user in user_list:
-    		user.msg_user.send('%s %s' % (notify_content, '[华尔街by imTrader]'))
+    		user.msg_user.send(u'%s %s' % (notify_content, '[by imTrader]'))
     		log.info('crawler has sent news to user:' + user.user_info)
 
 def schedule_crawler():
@@ -106,6 +106,7 @@ def schedule_crawler():
          # Not strictly necessary if daemonic mode is enabled but should be
          # done if possible
         scheduler.shutdown()
+        itchat.logout()
 
 def add_user(msg):
 	global user_list
@@ -131,21 +132,27 @@ def text_reply(msg):
     global user_list
 
     if msg.text == crawler_help:
-    	msg.user.send('%s\n%s\n%s\n%s' % ('imTrader v0.1 机器人命令指南:','start, 收听华尔街快讯直播','stop, 停止收听直播', 'latest, 马上获取最新消息' ))
+    	msg.user.send(u'%s\n%s\n%s\n%s' % (u'imTrader v0.1 机器人命令指南:',u'start, 收听华尔街快讯直播',u'stop, 停止收听直播', u'latest, 马上获取最新消息' ))
     elif msg.text == crawler_key:
-    	msg.user.send('%s, %s' % ('Hey man', '开始收听华尔街快讯!'))
+    	msg.user.send(u'%s, %s' % (u'Hey man', '开始收听华尔街快讯!'))
     	add_user(msg)
        
     elif msg.text == crawler_stop:
-        msg.user.send('%s: %s' % ('停止收听直播快讯', '欢迎再会.'))
+        msg.user.send(u'%s: %s' % (u'停止收听直播快讯', '欢迎再会.'))
         remove_user(msg)
 
     elif msg.text == crawler_latest:
     	notify_content = wall_street_latest()
     	log.info('Send latest news to user')
-    	msg.user.send('%s %s' % (notify_content, '[by imTrader]'))
+    	msg.user.send(u'%s %s' % (notify_content, '[by imTrader]'))
     else:
-    	msg.user.send('%s %s' % ('Sorry, wrong key...', '[华尔街by imTrader]'))
+    	msg.user.send(u'%s %s' % ('Sorry, wrong key...','[by imTrader]'))
+
+def lc():
+    log.info('wechat login success')
+
+def retry_login():
+    log.info('wechat logout itself')
 
 
 crawler_key = 'start'
@@ -158,7 +165,7 @@ user_list = set()
 log = setLog()
 
 schedule_crawler()
-itchat.auto_login(hotReload=True)
+itchat.auto_login(loginCallback=lc, exitCallback=retry_login)
 # itchat.auto_login()
 itchat.run(True)
 # if __name__ == '__main__':
