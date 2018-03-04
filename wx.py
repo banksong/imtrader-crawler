@@ -11,6 +11,7 @@ import re
 from itchat.content import *
 from apscheduler.schedulers.background import BackgroundScheduler
 from logging.handlers import TimedRotatingFileHandler
+import sys
 
 
 class wechatUser:
@@ -98,7 +99,7 @@ def crawler():
 def schedule_crawler():
     scheduler = BackgroundScheduler()
     global log
-    scheduler.add_job(crawler, 'interval', seconds=3)
+    scheduler.add_job(crawler, 'interval', seconds=10)
     scheduler.start()
     try:
         log.info('have start a schedule job')
@@ -146,7 +147,7 @@ def text_reply(msg):
     	log.info('Send latest news to user')
     	msg.user.send(u'%s %s' % (notify_content, '[by imTrader]'))
     else:
-    	msg.user.send(u'%s %s' % ('Sorry, wrong key...','[by imTrader]'))
+    	return
 
 def lc():
     log.info('wechat login success')
@@ -154,7 +155,7 @@ def lc():
 def retry_login():
     log.info('wechat logout itself')
 
-
+sys.getdefaultencoding()
 crawler_key = 'start'
 crawler_stop = 'stop'
 crawler_help = 'help'
