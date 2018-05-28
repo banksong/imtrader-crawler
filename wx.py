@@ -55,14 +55,14 @@ def wall_street_latest():
     starttime = datetime.datetime(1970, 1, 1, 8, 0, 0)
     # 读取新闻内容接口
     response = urllib.request.urlopen(
-        'http://api.wallstreetcn.com/v2/livenews?limit=0')
+        'https://api-prod.wallstreetcn.com/apiv1/content/lives?channel=global-channel&limit=0')
     http = response.read()
     hjson = json.loads(http.decode())
-    liveNew = hjson['results'][0]
-    time = liveNew['createdAt']
+    liveNew = hjson['data']['items'][0]
+    time = liveNew['display_time']
     content = ''
     t = starttime + datetime.timedelta(seconds=int(time))
-    content = liveNew['contentText'] + ' '
+    content = liveNew['content_text'] + ' '
     content = content + t.strftime('%Y-%m-%d %H:%M')
     return content
 
@@ -71,18 +71,18 @@ def wallstreet():
     starttime = datetime.datetime(1970, 1, 1, 8, 0, 0)
     # 读取新闻内容接口
     response = urllib.request.urlopen(
-        'http://api.wallstreetcn.com/v2/livenews?limit=0')
+        'https://api-prod.wallstreetcn.com/apiv1/content/lives?channel=global-channel&limit=0')
     http = response.read()
     hjson = json.loads(http.decode())
-    liveNew = hjson['results'][0]
-    time = liveNew['createdAt']
+    liveNew = hjson['data']['items'][0]
+    time = liveNew['display_time']
     content = ''
     if time == last_update_time:
         return ''
     else:
         last_update_time = time
         t = starttime + datetime.timedelta(seconds=int(time))
-        content = liveNew['contentText'] + ' '
+        content = liveNew['content_text'] + ' '
         content = content + t.strftime('%Y-%m-%d %H:%M')
         return content
 
@@ -99,7 +99,7 @@ def crawler():
 def schedule_crawler():
     scheduler = BackgroundScheduler()
     global log
-    scheduler.add_job(crawler, 'interval', seconds=10)
+    scheduler.add_job(crawler, 'interval', seconds=15)
     scheduler.start()
     try:
         log.info('have start a schedule job')
