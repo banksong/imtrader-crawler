@@ -12,6 +12,8 @@ from itchat.content import *
 from apscheduler.schedulers.background import BackgroundScheduler
 from logging.handlers import TimedRotatingFileHandler
 import sys
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
 class wechatUser:
